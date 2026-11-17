@@ -23,7 +23,7 @@ Demo mode disables incoming Zoom webhooks. Stop the demo process before starting
 
 You will need a Zoom app configured for Zoom Phone RTMS, RTMS enabled for the target calls, and your app's Client ID, Client Secret, and Webhook Secret Token.
 
-> **Zoom web portal setup:** the steps below cover this service and its webhook configuration only. Additional setup in the Zoom web portal is required to enable Zoom Phone RTMS for your account and target calls. That portal setup is not covered here, and the relevant Zoom documentation is not yet available. Refer to Zoom's official documentation for the portal setup steps once it is published.
+> **Zoom web portal setup:** the steps below cover this service and its webhook configuration only. Additional setup in the Zoom web portal is required to enable Zoom Phone RTMS for your account and users. That portal setup is not covered here, and the relevant Zoom documentation is not yet available. Refer to Zoom's official documentation for the portal setup steps once it is published.
 
 ### 1. Configure and start the service
 
@@ -98,31 +98,31 @@ To connect downstream processing, register listeners on `manager` in `src/server
 
 Copy [.env.example](.env.example) for the complete configuration template. Credentials are required in live mode only. At least one media type must be enabled.
 
-| Variable | Default | Description |
-| --- | --- | --- |
-| `RTMS_PORT` | `3002` | HTTP listener port |
-| `RTMS_DEMO_MODE` | `false` | Run without credentials and disable Zoom webhooks |
-| `RTMS_ZOOM_CLIENT_ID` | Required in live mode | Client ID; falls back to `ZOOM_APP_CLIENT_ID` |
-| `RTMS_ZOOM_CLIENT_SECRET` | Required in live mode | Client secret; falls back to `ZOOM_APP_CLIENT_SECRET` |
-| `ZOOM_SECRET_TOKEN` | Required in live mode | Webhook verification secret |
-| `RTMS_PROTOCOL_VERSION` | `2` | RTMS protocol version sent in handshakes |
-| `RTMS_AUDIO_SEND_RATE_MS` | `20` | Requested audio send rate in milliseconds |
-| `RTMS_ENABLE_AUDIO` | `true` | Connect the audio media WebSocket |
-| `RTMS_ENABLE_TRANSCRIPT` | `true` | Connect the transcript media WebSocket |
-| `RTMS_LOG_TRANSCRIPTS` | `true` | Include transcript content in process logs |
-| `RTMS_WEBHOOK_MAX_AGE_SECONDS` | `300` | Allowed webhook timestamp skew in either direction |
-| `RTMS_MAX_SESSIONS` | `100` | Maximum concurrent RTMS sessions per process |
-| `RTMS_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
+| Variable                       | Default               | Description                                           |
+| ------------------------------ | --------------------- | ----------------------------------------------------- |
+| `RTMS_PORT`                    | `3002`                | HTTP listener port                                    |
+| `RTMS_DEMO_MODE`               | `false`               | Run without credentials and disable Zoom webhooks     |
+| `RTMS_ZOOM_CLIENT_ID`          | Required in live mode | Client ID; falls back to `ZOOM_APP_CLIENT_ID`         |
+| `RTMS_ZOOM_CLIENT_SECRET`      | Required in live mode | Client secret; falls back to `ZOOM_APP_CLIENT_SECRET` |
+| `ZOOM_SECRET_TOKEN`            | Required in live mode | Webhook verification secret                           |
+| `RTMS_PROTOCOL_VERSION`        | `2`                   | RTMS protocol version sent in handshakes              |
+| `RTMS_AUDIO_SEND_RATE_MS`      | `20`                  | Requested audio send rate in milliseconds             |
+| `RTMS_ENABLE_AUDIO`            | `true`                | Connect the audio media WebSocket                     |
+| `RTMS_ENABLE_TRANSCRIPT`       | `true`                | Connect the transcript media WebSocket                |
+| `RTMS_LOG_TRANSCRIPTS`         | `true`                | Include transcript content in process logs            |
+| `RTMS_WEBHOOK_MAX_AGE_SECONDS` | `300`                 | Allowed webhook timestamp skew in either direction    |
+| `RTMS_MAX_SESSIONS`            | `100`                 | Maximum concurrent RTMS sessions per process          |
+| `RTMS_LOG_LEVEL`               | `info`                | `debug`, `info`, `warn`, or `error`                   |
 
 ## Endpoints
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| `GET` | `/` | Public transcript and payload viewer |
-| `GET` | `/api/transcripts/events` | Public SSE feed with recent history |
-| `POST` | `/api/webhooks/zoom` | Signed Zoom webhook receiver; alias `/webhook` |
-| `GET` | `/healthz` | Process health response |
-| `GET` | `/api/status` | Service status and active stream count |
+| Method | Path                      | Purpose                                        |
+| ------ | ------------------------- | ---------------------------------------------- |
+| `GET`  | `/`                       | Public transcript and payload viewer           |
+| `GET`  | `/api/transcripts/events` | Public SSE feed with recent history            |
+| `POST` | `/api/webhooks/zoom`      | Signed Zoom webhook receiver; alias `/webhook` |
+| `GET`  | `/healthz`                | Process health response                        |
+| `GET`  | `/api/status`             | Service status and active stream count         |
 
 When using a reverse proxy, disable response buffering for the SSE endpoint and allow long-lived streaming responses.
 
@@ -130,11 +130,11 @@ When using a reverse proxy, disable response buffering for the SSE endpoint and 
 
 The service keeps rolling history in process memory:
 
-| Data | Retention limit |
-| --- | --- |
-| Transcripts | 500 segments or 512 KiB; text capped at 16,000 characters per segment |
-| Call start/stop webhooks | 20 events or 512 KiB |
-| RTMS diagnostic messages | 200 messages or 512 KiB, including sampled audio |
+| Data                     | Retention limit                                                       |
+| ------------------------ | --------------------------------------------------------------------- |
+| Transcripts              | 500 segments or 512 KiB; text capped at 16,000 characters per segment |
+| Call start/stop webhooks | 20 events or 512 KiB                                                  |
+| RTMS diagnostic messages | 200 messages or 512 KiB, including sampled audio                      |
 
 Each buffer evicts its oldest entries when either limit is exceeded. A restart clears all history and ends active streams. The application does not write audio or transcripts to files; browser downloads and hosting-provider logs have separate retention. Transcript logging is enabled by default.
 
