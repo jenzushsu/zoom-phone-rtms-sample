@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zoom Phone · Live transcript</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="workspace" aria-label="Live transcript and webhook comparison">
+    <div class="toolbar">
+      <label class="call-filter" for="call">Call <select id="call"><option value="">All calls</option></select></label>
+      <div class="controls">
+        <span id="connection" class="status" role="status">Connecting…</span>
+        <label class="follow"><input id="follow" type="checkbox" checked> Auto-scroll</label>
+        <button id="demo">Play demo</button>
+        <button id="download" disabled>Download text</button>
+      </div>
+    </div>
+    <div id="demo-banner" hidden>Demo preview <button id="exit-demo">Return to live</button></div>
+    <div class="comparison">
+      <section class="transcript-pane" aria-labelledby="transcript-title">
+        <div class="pane-heading"><h2 id="transcript-title">Transcript</h2><span id="summary">Waiting for a call</span></div>
+        <div id="transcript" role="log" aria-label="Live transcript" aria-live="polite" aria-relevant="additions text"></div>
+        <div id="empty"><p>Start an RTMS-enabled call to see the transcript.</p></div>
+      </section>
+      <section class="payload-pane" aria-labelledby="payload-title">
+        <div class="pane-heading"><h2 id="payload-title">RTMS payloads</h2><span>Start / stop + messages 2, 4, 12, 14, 17</span></div>
+        <div class="payload-controls">
+          <span id="event-count" role="status">0 events</span>
+          <button id="latest-event" aria-pressed="true">Follow latest</button>
+          <label class="follow"><input id="exact-body" type="checkbox"> Exact body</label>
+        </div>
+        <p class="payload-meta">Audio payloads are sampled: one packet per second per stream. Other listed messages are captured as received.</p>
+        <ol id="event-list" class="event-list" aria-label="Webhooks and RTMS messages in receipt order"></ol>
+        <p id="event-empty" class="event-empty">Waiting for call events.</p>
+        <p id="payload-meta" class="payload-meta" role="status">Waiting for a call webhook or RTMS message.</p>
+        <pre id="payload" tabindex="0" aria-label="Original received JSON">Webhook and RTMS message bodies will appear here as they arrive.</pre>
+      </section>
+    </div>
+    <footer><span id="count">0 transcript segments</span><span>Public viewer · Transcripts, webhook bodies and sampled audio payloads are visible to anyone with this URL</span></footer>
+  </main>
+</body>
+</html>
