@@ -23,6 +23,8 @@ Demo mode disables incoming Zoom webhooks. Stop the demo process before starting
 
 You will need a Zoom app configured for Zoom Phone RTMS, RTMS enabled for the target calls, and your app's Client ID, Client Secret, and Webhook Secret Token.
 
+> **Zoom web portal setup:** the steps below cover this service and its webhook configuration only. Additional setup in the Zoom web portal is required to enable Zoom Phone RTMS for your account and target calls. That portal setup is not covered here, and the relevant Zoom documentation is not yet available. Refer to Zoom's official documentation for the portal setup steps once it is published.
+
 ### 1. Configure and start the service
 
 ```bash
