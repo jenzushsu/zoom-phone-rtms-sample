@@ -21,9 +21,13 @@ Demo mode disables incoming Zoom webhooks. Stop the demo process before starting
 
 ## Connect live Zoom Phone calls
 
-You will need a Zoom app configured for Zoom Phone RTMS, RTMS enabled for the target calls, and your app's Client ID, Client Secret, and Webhook Secret Token.
+Start with Zoom's [Phone RTMS getting-started guide](https://developers.zoom.us/docs/rtms/phone/getting-started/) and [app and phone-user setup](https://developers.zoom.us/docs/rtms/phone/add-features/). Before testing live calls, you need:
 
-> **Zoom web portal setup:** the steps below cover this service and its webhook configuration only. Additional setup in the Zoom web portal is required to enable Zoom Phone RTMS for your account and users. That portal setup is not covered here, and the relevant Zoom documentation is not yet available. Refer to Zoom's official documentation for the portal setup steps once it is published.
+- An active Zoom Developer Pack subscription with sufficient credits and a Zoom Phone license for each participating user.
+- A general OAuth app with all three Phone RTMS event subscriptions listed below and both scopes: `phone:read:voice_call_audio` and `phone:read:voice_call_transcript`. Zoom requires these events and scopes for the app to appear in phone settings.
+- RTMS enabled and the app selected in each target user's phone policy, with **Automatic start** enabled for this demo. Follow Zoom's [app authorization steps for other users](https://developers.zoom.us/docs/rtms/phone/quickstart/#add-the-app-for-other-users) when applicable.
+
+Use Zoom's guides for Marketplace and web portal steps, user controls, and audio notifications. The steps below cover this repository's credentials, local service, and webhook URL.
 
 ### 1. Configure and start the service
 
@@ -59,6 +63,9 @@ In your Zoom app, configure the event notification endpoint as `https://<your-ng
 
 - `phone.call_rtms_started`
 - `phone.call_rtms_stopped`
+- `phone.call_rtms_interrupted`
+
+Subscribe to all three for Zoom app setup. This PoC handles start and stop events; signed interruption events are acknowledged and logged as ignored, with no recovery action or viewer entry.
 
 The `/webhook` path is an alias. This implementation requires valid Zoom signatures for endpoint validation requests as well as call events.
 
@@ -105,7 +112,7 @@ Copy [.env.example](.env.example) for the complete configuration template. Crede
 | `RTMS_ZOOM_CLIENT_ID`          | Required in live mode | Client ID; falls back to `ZOOM_APP_CLIENT_ID`         |
 | `RTMS_ZOOM_CLIENT_SECRET`      | Required in live mode | Client secret; falls back to `ZOOM_APP_CLIENT_SECRET` |
 | `ZOOM_SECRET_TOKEN`            | Required in live mode | Webhook verification secret                           |
-| `RTMS_PROTOCOL_VERSION`        | `2`                   | RTMS protocol version sent in handshakes              |
+| `RTMS_PROTOCOL_VERSION`        | `2`                   | Keep at `2` for Zoom Phone, as required by Zoom's quickstart |
 | `RTMS_AUDIO_SEND_RATE_MS`      | `20`                  | Requested audio send rate in milliseconds             |
 | `RTMS_ENABLE_AUDIO`            | `true`                | Connect the audio media WebSocket                     |
 | `RTMS_ENABLE_TRANSCRIPT`       | `true`                | Connect the transcript media WebSocket                |
@@ -145,7 +152,7 @@ This is a single-process PoC with these operational limits:
 - Duplicate start events are ignored only while the stream is active. Webhook delivery IDs are not persisted for replay deduplication.
 - Multiple replicas require stream ownership, webhook routing, and shared-state design.
 - WebSocket URLs must use `wss:`, but hostnames are not allowlisted. Signed webhook verification is the initial trust boundary.
-- The implementation sends protocol version `2` by default and one readiness acknowledgment per media type, including `media_type`. Confirm these settings against your Zoom Phone RTMS integration before a live demo.
+- The implementation sends protocol version `2` and a readiness acknowledgment after each media handshake. It includes an extra `media_type` field in that acknowledgment; Zoom's [Phone WebSocket quickstart](https://developers.zoom.us/docs/rtms/phone/quickstart/) omits that field. Validate this difference against live calls before a demo.
 
 ## Development
 
@@ -171,6 +178,13 @@ test/                       Security, session, and transcript tests
 
 ## References
 
+Zoom's public documentation is the source of truth for platform prerequisites, portal configuration, protocol schemas, and event definitions. This README covers running this PoC, its viewer, configuration, and implementation limits.
+
+- [Zoom Phone RTMS overview](https://developers.zoom.us/docs/rtms/phone/)
+- [Phone RTMS setup](https://developers.zoom.us/docs/rtms/phone/add-features/) — app events, scopes, and per-user phone policies.
+- [Phone RTMS WebSocket quickstart](https://developers.zoom.us/docs/rtms/phone/quickstart/) — authorization and signaling/media connection walkthrough.
+- [Zoom Phone stream events](https://developers.zoom.us/docs/rtms/event-reference/phone-events/) — participant changes, hold, resume, and transfer events; this viewer does not render these as call-state updates.
+- [RTMS webhook reference](https://developers.zoom.us/docs/api/rtms/events/) — lifecycle webhook payloads.
 - [Zoom RTMS data types](https://developers.zoom.us/docs/rtms/data-types/)
 - [Zoom RTMS universal events](https://developers.zoom.us/docs/rtms/event-reference/universal-events/)
-- [Zoom Meetings RTMS WebSocket quickstart](https://developers.zoom.us/docs/rtms/meetings/quickstart-websockets/) — background reference for the WebSocket flow; this project handles Zoom Phone events.
+- [RTMS troubleshooting](https://developers.zoom.us/docs/rtms/troubleshooting/)
